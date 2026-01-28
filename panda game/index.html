@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catch the Panda Surprise 🐼</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(270deg, #ff9a9e, #fad0c4, #a1c4fd, #c2e9fb);
+    background-size: 800% 800%;
+    animation: gradientBG 15s ease infinite;
+  }
+
+  @keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background: rgba(255,255,255,0.95);
+    padding: 20px 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    z-index: 10;
+  }
+
+  input { padding: 8px; width: 100px; margin-top: 10px; border-radius: 8px; border: 1px solid #ccc; }
+
+  button {
+    background: #ff4e50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 15px;
+    font-size: 1em;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  button:hover { background: #ff7b7b; }
+
+  .hidden { display: none; }
+
+  .panda {
+    position: absolute;
+    width: 80px;
+    max-width: 20vw;
+    cursor: pointer;
+    transition: top 0.3s, left 0.3s;
+    user-select: none;
+    z-index: 5;
+    display: none; /* Initially hidden until code unlocks */
+  }
+
+  .message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: rgba(255,255,255,0.95);
+    padding: 20px 30px;
+    border-radius: 20px;
+    text-align: center;
+    display: none; /* Start hidden */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    z-index: 15;
+    animation: popUp 1s forwards;
+  }
+
+  @keyframes popUp {
+    0% { transform: translate(-50%, -50%) scale(0); }
+    70% { transform: translate(-50%, -50%) scale(1.2); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+  }
+
+  .letter {
+    position: absolute;
+    font-size: 1.5em;
+    font-weight: bold;
+    display: none;
+    z-index: 20;
+    animation: floatLetter 1s ease forwards;
+  }
+
+  @keyframes floatLetter {
+    0% { opacity: 0; transform: translateY(0) scale(0); }
+    50% { opacity: 1; transform: translateY(-30px) scale(1.2); }
+    100% { opacity: 0; transform: translateY(-60px) scale(1); }
+  }
+
+  .confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: red;
+    z-index: 20;
+    opacity: 0.8;
+    pointer-events: none;
+    border-radius: 50%;
+  }
+</style>
+</head>
+<body>
+
+<div class="container" id="lockScreen">
+  <h1>🔒 Enter Secret Code 🔒</h1>
+  <p>Only those who know the code can play!</p>
+  <input type="number" id="secretCodeInput" placeholder="Enter code">
+  <button id="unlockBtn">Unlock 🔑</button>
+  <p id="codeMessage" style="color:red;"></p>
+</div>
+
+<img src="panda.avif" class="panda" id="panda">
+
+<div class="message" id="message">
+  <h1>🎉 You caught me! 🎉</h1>
+  <p>You're my favorite person in the world, and I love you more every day ❤️</p>
+</div>
+
+<div class="letter" id="letter">❤️</div>
+
+<script>
+const secretCode = 5108;
+const unlockBtn = document.getElementById('unlockBtn');
+const secretInput = document.getElementById('secretCodeInput');
+const codeMessage = document.getElementById('codeMessage');
+const lockScreen = document.getElementById('lockScreen');
+
+const panda = document.getElementById('panda');
+const message = document.getElementById('message');
+const letter = document.getElementById('letter');
+
+let attempts = 0;
+const maxAttempts = 5;
+
+// Unlock game
+unlockBtn.onclick = () => {
+  const enteredCode = parseInt(secretInput.value);
+  if(enteredCode === secretCode) {
+    codeMessage.style.color = "green";
+    codeMessage.textContent = "Code accepted! Start catching the panda 🎲";
+    setTimeout(() => {
+      lockScreen.classList.add('hidden');
+      panda.style.display = 'block';
+      movePanda();
+    }, 1000);
+  } else {
+    codeMessage.style.color = "red";
+    codeMessage.textContent = "❌ Wrong code! Try again.";
+  }
+}
+
+// Panda movement
+function movePanda() {
+  const maxWidth = window.innerWidth - panda.width;
+  const maxHeight = window.innerHeight - panda.height;
+  const left = Math.random() * maxWidth;
+  const top = Math.random() * maxHeight;
+  panda.style.left = left + 'px';
+  panda.style.top = top + 'px';
+}
+
+panda.addEventListener('click', () => {
+  attempts++;
+  if(attempts < maxAttempts) {
+    movePanda();
+  } else {
+    panda.style.display = 'none';
+    message.style.display = 'block';
+    showLetters();
+    showConfetti();
+  }
+});
+
+// Heart letters floating
+function showLetters() {
+  const maxWidth = window.innerWidth - 50;
+  const maxHeight = window.innerHeight - 50;
+  let count = 0;
+  const interval = setInterval(() => {
+    if(count >= 20) {
+      clearInterval(interval);
+      return;
+    }
+    const left = Math.random() * maxWidth;
+    const top = Math.random() * maxHeight;
+    const newLetter = letter.cloneNode(true);
+    document.body.appendChild(newLetter);
+    newLetter.style.left = left + 'px';
+    newLetter.style.top = top + 'px';
+    newLetter.style.display = 'block';
+    setTimeout(() => newLetter.remove(), 1000);
+    count++;
+  }, 150);
+}
+
+// Confetti effect
+function showConfetti() {
+  const colors = ['#ff4e50','#f9d423','#24c6dc','#a18cd1','#ff6a88','#69ff97'];
+  for(let i=0;i<100;i++){
+    const confetti = document.createElement('div');
+    confetti.classList.add('confetti');
+    confetti.style.background = colors[Math.floor(Math.random()*colors.length)];
+    confetti.style.left = Math.random()*window.innerWidth+'px';
+    confetti.style.top = Math.random()*window.innerHeight+'px';
+    document.body.appendChild(confetti);
+    animateConfetti(confetti);
+  }
+}
+
+function animateConfetti(el){
+  const end = window.innerHeight + 50;
+  let top = parseFloat(el.style.top);
+  const fall = setInterval(()=>{
+    top += Math.random()*5+2;
+    el.style.top = top+'px';
+    if(top>end){
+      el.remove();
+      clearInterval(fall);
+    }
+  },30);
+}
+
+// Slight movement for suspense
+setInterval(() => {
+  if(attempts < maxAttempts && panda.style.display !== 'none') movePanda();
+}, 2000);
+
+window.addEventListener('resize', () => {
+  if(panda.style.display !== 'none') movePanda();
+});
+</script>
+
+</body>
+</html>
